@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post-Workout Meal Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            display: block;
+            margin: 0 auto;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #f8f9fa;
+            border-left: 5px solid #3498db;
+        }
+        .meal {
+            margin-bottom: 30px;
+        }
+        .meal h3 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+        .nutritional-benefits {
+            background-color: #e8f4fc;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        .nutritional-benefits h4 {
+            margin-top: 0;
+            color: #3498db;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Post-Workout Meal Generator</h1>
+        
+        <div class="form-group">
+            <label for="workout-type">What type of workout did you do today?</label>
+            <select id="workout-type">
+                <option value="weightlifting">Weight Lifting</option>
+                <option value="swimming">Swimming</option>
+                <option value="biking">Biking</option>
+                <option value="running">Running</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="intensity">Workout Intensity:</label>
+            <select id="intensity">
+                <option value="light">Light (30-45 min, not very challenging)</option>
+                <option value="moderate">Moderate (45-75 min, somewhat challenging)</option>
+                <option value="intense">Intense (75+ min, very challenging)</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="meal-time">How soon after workout?</label>
+            <select id="meal-time">
+                <option value="immediate">Immediate (within 30 min)</option>
+                <option value="delayed">Delayed (1-2 hours after)</option>
+            </select>
+        </div>
+        
+        <button id="generate-btn">Generate Meal Suggestions</button>
+        
+        <div id="result" class="hidden"></div>
+    </div>
+
+    <script>
+        const availableIngredients = [
+            "eggs", "tofu", "salmon", "lentils", "red beans", "black beans", "walnuts", 
+            "pecans", "whole grain pasta", "potatoes", "whole grain bread", "sweet potatoes", 
+            "bananas", "apples", "spinach", "onions", "broccoli", "peanut butter", 
+            "brown rice", "spelt bran", "avocados", "feta cheese", "oat milk", 
+            "lemon juice", "mushrooms", "quinoa", "millet", "bulgur"
+        ];
+
+        // Meals database organized by workout type and nutritional focus
+        const mealSuggestions = {
+            weightlifting: {
+                highProtein: [
+                    {
+                        title: "Protein-Packed Power Bowl",
+                        ingredients: ["quinoa", "tofu", "black beans", "broccoli", "avocados"],
+                        instructions: "Cook quinoa according to package instructions. In a separate pan, sauté tofu cubes until golden. Steam broccoli until tender. Combine all ingredients in a bowl, top with sliced avocado.",
+                        benefits: "High in complete proteins for muscle repair, complex carbs for glycogen replenishment, and healthy fats for recovery."
+                    },
+                    {
+                        title: "Muscle Recovery Salmon Plate",
+                        ingredients: ["salmon", "sweet potatoes", "spinach", "walnuts", "lemon juice"],
+                        instructions: "Bake salmon fillet with lemon juice. Roast sweet potato wedges. Serve with a side of spinach sautéed with walnuts.",
+                        benefits: "Rich in protein, omega-3 fatty acids to reduce inflammation, and complex carbs to restore energy."
+                    },
+                    {
+                        title: "Protein-Rich Breakfast Bowl",
+                        ingredients: ["eggs", "spinach", "avocados", "whole grain bread", "feta cheese"],
+                        instructions: "Scramble eggs with spinach. Serve with sliced avocado, a sprinkle of feta cheese, and a slice of toasted whole grain bread.",
+                        benefits: "Complete proteins for muscle synthesis, iron from spinach, and healthy fats for hormone production."
+                    },
+                    {
+                        title: "Lentil Power Bowl",
+                        ingredients: ["lentils", "sweet potatoes", "spinach", "feta cheese", "walnuts"],
+                        instructions: "Cook lentils until tender. Roast diced sweet potatoes. Sauté spinach. Combine all ingredients and top with crumbled feta and chopped walnuts.",
+                        benefits: "Plant-based proteins, complex carbs, and iron to support muscle recovery and energy restoration."
+                    }
+                ],
+                balancedRecovery: [
+                    {
+                        title: "Complete Recovery Plate",
+                        ingredients: ["salmon", "brown rice", "broccoli", "avocados", "lemon juice"],
+                        instructions: "Grill salmon with lemon juice. Serve with brown rice and steamed broccoli. Add sliced avocado on the side.",
+                        benefits: "Perfect balance of proteins, complex carbs, and healthy fats for optimal recovery."
+                    },
+                    {
+                        title: "Balanced Muscle Meal",
+                        ingredients: ["eggs", "sweet potatoes", "spinach", "avocados", "whole grain bread"],
+                        instructions: "Make a sweet potato hash. Top with poached eggs and sautéed spinach. Serve with whole grain toast and sliced avocado.",
+                        benefits: "Complete proteins, complex carbs, and micronutrients for comprehensive recovery."
+                    },
+                    {
+                        title: "Recovery Buddha Bowl",
+                        ingredients: ["tofu", "quinoa", "broccoli", "avocados", "walnuts"],
+                        instructions: "Season and bake tofu cubes. Cook quinoa. Steam broccoli. Arrange in a bowl with sliced avocado and crushed walnuts.",
+                        benefits: "Plant-based proteins, whole grains, and healthy fats to promote muscle repair and reduce inflammation."
+                    },
+                    {
+                        title: "Strength Builder Plate",
+                        ingredients: ["lentils", "brown rice", "spinach", "mushrooms", "walnuts"],
+                        instructions: "Cook lentils and brown rice. Sauté spinach and mushrooms with some chopped walnuts. Combine all ingredients.",
+                        benefits: "Plant proteins, complex carbs, and antioxidants to support muscle growth and recovery."
+                    }
+                ]
+            },
+            swimming: {
+                energyRestore: [
+                    {
+                        title: "Swimmer's Refuel Bowl",
+                        ingredients: ["quinoa", "salmon", "spinach", "avocados", "lemon juice"],
+                        instructions: "Cook quinoa. Grill salmon with lemon juice. Sauté spinach. Arrange in a bowl and top with sliced avocado.",
+                        benefits: "Rich in omega-3s to reduce inflammation, complex carbs to restore glycogen, and proteins for muscle repair."
+                    },
+                    {
+                        title: "Aquatic Energy Plate",
+                        ingredients: ["whole grain pasta", "tofu", "broccoli", "walnuts", "avocados"],
+                        instructions: "Cook pasta. Sauté tofu and broccoli. Toss together with chopped walnuts and sliced avocado.",
+                        benefits: "Higher in carbs to replenish energy stores with adequate protein for recovery after prolonged swimming."
+                    },
+                    {
+                        title: "Swimmer's Carb-Protein Balance",
+                        ingredients: ["brown rice", "eggs", "sweet potatoes", "broccoli", "avocados"],
+                        instructions: "Cook brown rice and roast sweet potato chunks. Top with scrambled eggs and steamed broccoli. Add sliced avocado.",
+                        benefits: "Balanced carbohydrates for energy replenishment with quality proteins for muscle recovery."
+                    },
+                    {
+                        title: "Post-Swim Power Bowl",
+                        ingredients: ["bulgur", "lentils", "spinach", "feta cheese", "walnuts"],
+                        instructions: "Cook bulgur and lentils. Wilt spinach. Combine and top with crumbled feta and chopped walnuts.",
+                        benefits: "Complex carbs to restore energy with plant proteins for sustained recovery after swimming."
+                    }
+                ],
+                lightRecovery: [
+                    {
+                        title: "Easy Swim Recovery",
+                        ingredients: ["whole grain bread", "peanut butter", "bananas", "oat milk"],
+                        instructions: "Toast whole grain bread. Spread with peanut butter and top with banana slices. Serve with a glass of oat milk.",
+                        benefits: "Quick-digesting carbs to restore energy with moderate protein for light recovery needs."
+                    },
+                    {
+                        title: "Hydrating Recovery Plate",
+                        ingredients: ["sweet potatoes", "eggs", "spinach", "avocados"],
+                        instructions: "Roast sweet potato wedges. Prepare eggs your favorite way. Serve with fresh spinach and sliced avocado.",
+                        benefits: "Hydrating foods with electrolytes and moderate protein for recovery after water exercise."
+                    },
+                    {
+                        title: "Light Swim Refuel",
+                        ingredients: ["quinoa", "broccoli", "tofu", "lemon juice"],
+                        instructions: "Cook quinoa. Steam broccoli and sauté tofu. Combine with a splash of lemon juice.",
+                        benefits: "Easily digestible recovery meal with balanced nutrients for light to moderate swimming sessions."
+                    },
+                    {
+                        title: "Quick Recovery Toast",
+                        ingredients: ["whole grain bread", "avocados", "eggs", "feta cheese"],
+                        instructions: "Toast bread. Top with mashed avocado, poached eggs, and crumbled feta cheese.",
+                        benefits: "Fast-absorbing nutrients to begin the recovery process with quality proteins and healthy fats."
+                    }
+                ]
+            },
+            biking: {
+                enduranceRecovery: [
+                    {
+                        title: "Cyclist's Carb Bowl",
+                        ingredients: ["brown rice", "black beans", "sweet potatoes", "avocados", "spinach"],
+                        instructions: "Cook brown rice. Roast sweet potatoes. Heat black beans. Arrange in a bowl and top with spinach and sliced avocado.",
+                        benefits: "Higher carb ratio to replenish glycogen stores with adequate protein for muscle recovery after endurance cycling."
+                    },
+                    {
+                        title: "Endurance Recovery Plate",
+                        ingredients: ["whole grain pasta", "salmon", "broccoli", "walnuts", "lemon juice"],
+                        instructions: "Cook pasta. Grill salmon with lemon juice. Steam broccoli. Toss all ingredients together with chopped walnuts.",
+                        benefits: "Complex carbs for glycogen restoration with quality proteins and omega-3s for optimal recovery."
+                    },
+                    {
+                        title: "Bike Power Refuel Bowl",
+                        ingredients: ["quinoa", "lentils", "sweet potatoes", "spinach", "avocados"],
+                        instructions: "Cook quinoa and lentils. Roast sweet potatoes. Wilt spinach. Combine and top with sliced avocado.",
+                        benefits: "Balanced complex carbs and plant proteins with antioxidants to aid recovery after long rides."
+                    },
+                    {
+                        title: "Cyclist's Energy Restore",
+                        ingredients: ["bulgur", "eggs", "mushrooms", "spinach", "feta cheese"],
+                        instructions: "Cook bulgur. Scramble eggs with mushrooms and spinach. Combine and top with crumbled feta.",
+                        benefits: "Whole grain carbs to restore energy with complete proteins for muscle repair after cycling."
+                    }
+                ],
+                moderateRecovery: [
+                    {
+                        title: "Balanced Bike Recovery",
+                        ingredients: ["sweet potatoes", "tofu", "broccoli", "walnuts", "avocados"],
+                        instructions: "Roast sweet potatoes. Sauté tofu until golden. Steam broccoli. Serve together with sliced avocado and chopped walnuts.",
+                        benefits: "Balanced meal to support recovery after moderate cycling with focus on carb replenishment and muscle repair."
+                    },
+                    {
+                        title: "Cycling Refuel Plate",
+                        ingredients: ["whole grain bread", "eggs", "spinach", "avocados", "feta cheese"],
+                        instructions: "Toast bread. Top with sautéed spinach, poached eggs, sliced avocado, and crumbled feta.",
+                        benefits: "Quick-digesting carbs with quality proteins and healthy fats for balanced recovery."
+                    },
+                    {
+                        title: "Bike Session Recovery Bowl",
+                        ingredients: ["brown rice", "black beans", "mushrooms", "spinach", "walnuts"],
+                        instructions: "Cook rice. Heat beans. Sauté mushrooms and spinach. Combine all ingredients and top with chopped walnuts.",
+                        benefits: "Moderate complex carbs with plant proteins and antioxidants for recovery and inflammation reduction."
+                    },
+                    {
+                        title: "Quick Cyclist Replenish",
+                        ingredients: ["bananas", "peanut butter", "whole grain bread", "oat milk"],
+                        instructions: "Toast bread. Spread with peanut butter and top with banana slices. Serve with a glass of oat milk.",
+                        benefits: "Fast-absorbing carbs to quickly restore energy with moderate protein for recovery after shorter rides."
+                    }
+                ]
+            },
+            running: {
+                intensiveRecovery: [
+                    {
+                        title: "Runner's Refuel Plate",
+                        ingredients: ["quinoa", "salmon", "sweet potatoes", "spinach", "avocados"],
+                        instructions: "Cook quinoa. Grill salmon. Roast sweet potatoes. Serve with fresh spinach and sliced avocado.",
+                        benefits: "Complete proteins for muscle repair with complex carbs to restore glycogen depleted during running."
+                    },
+                    {
+                        title: "Endurance Run Recovery Bowl",
+                        ingredients: ["brown rice", "tofu", "broccoli", "black beans", "avocados"],
+                        instructions: "Cook rice. Sauté tofu until golden. Steam broccoli. Heat black beans. Combine all ingredients and top with sliced avocado.",
+                        benefits: "Higher carb ratio to replace glycogen with complete proteins for muscle recovery after longer runs."
+                    },
+                    {
+                        title: "Runner's Repair Meal",
+                        ingredients: ["sweet potatoes", "eggs", "spinach", "feta cheese", "whole grain bread"],
+                        instructions: "Roast sweet potatoes. Prepare eggs your preferred way. Sauté spinach. Serve with toasted bread and crumbled feta.",
+                        benefits: "Balanced carbohydrates and proteins with electrolytes to support recovery after intensive running."
+                    },
+                    {
+                        title: "Trail Run Recovery Plate",
+                        ingredients: ["bulgur", "lentils", "sweet potatoes", "spinach", "walnuts"],
+                        instructions: "Cook bulgur and lentils. Roast sweet potatoes. Wilt spinach. Combine and top with chopped walnuts.",
+                        benefits: "Complex carbs for energy restoration with plant proteins and antioxidants to aid muscle recovery."
+                    }
+                ],
+                quickRecovery: [
+                    {
+                        title: "Quick Runner's Refuel",
+                        ingredients: ["bananas", "peanut butter", "whole grain bread", "oat milk"],
+                        instructions: "Toast bread. Spread with peanut butter and top with banana slices. Serve with a glass of oat milk.",
+                        benefits: "Fast-absorbing carbs to quickly restore glycogen with moderate protein for recovery after shorter runs."
+                    },
+                    {
+                        title: "Light Run Recovery Meal",
+                        ingredients: ["sweet potatoes", "eggs", "spinach", "avocados"],
+                        instructions: "Roast sweet potato wedges. Prepare eggs your preferred way. Serve with fresh spinach and sliced avocado.",
+                        benefits: "Balanced nutrients with focus on quality proteins and moderate carbs for recovery after light runs."
+                    },
+                    {
+                        title: "Jogger's Quick Recovery",
+                        ingredients: ["whole grain bread", "avocados", "eggs", "spinach"],
+                        instructions: "Toast bread. Top with mashed avocado, poached eggs, and fresh spinach.",
+                        benefits: "Quick-digesting nutrients to begin the recovery process with quality proteins and healthy fats."
+                    },
+                    {
+                        title: "Simple Run Refuel Bowl",
+                        ingredients: ["quinoa", "tofu", "broccoli", "lemon juice"],
+                        instructions: "Cook quinoa. Sauté tofu and broccoli with a splash of lemon juice. Combine all ingredients.",
+                        benefits: "Balanced recovery meal with adequate carbs and proteins for light to moderate running sessions."
+                    }
+                ]
+            }
+        };
+
+        document.getElementById('generate-btn').addEventListener('click', function() {
+            const workoutType = document.getElementById('workout-type').value;
+            const intensity = document.getElementById('intensity').value;
+            const mealTime = document.getElementById('meal-time').value;
+            
+            generateMealSuggestions(workoutType, intensity, mealTime);
+        });
+
+        function generateMealSuggestions(workoutType, intensity, mealTime) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '';
+            resultDiv.classList.remove('hidden');
+            
+            let mealCategory;
+            let numberOfMeals = 2; // Default number of meals to show
+            
+            // Determine appropriate meal category based on workout type and intensity
+            if (workoutType === 'weightlifting') {
+                mealCategory = (intensity === 'intense') ? 'highProtein' : 'balancedRecovery';
+            } else if (workoutType === 'swimming') {
+                mealCategory = (intensity === 'light') ? 'lightRecovery' : 'energyRestore';
+            } else if (workoutType === 'biking') {
+                mealCategory = (intensity === 'intense') ? 'enduranceRecovery' : 'moderateRecovery';
+            } else if (workoutType === 'running') {
+                mealCategory = (intensity === 'intense') ? 'intensiveRecovery' : 'quickRecovery';
+            }
+            
+            // Get meal suggestions based on category
+            const meals = mealSuggestions[workoutType][mealCategory];
+            
+            // Randomly select meals without duplication
+            const selectedMeals = [];
+            const mealsCopy = [...meals];
+            
+            for (let i = 0; i < numberOfMeals && mealsCopy.length > 0; i++) {
+                const randomIndex = Math.floor(Math.random() * mealsCopy.length);
+                selectedMeals.push(mealsCopy[randomIndex]);
+                mealsCopy.splice(randomIndex, 1);
+            }
+            
+            // Build recommendation intro based on workout type and intensity
+            let introText = '';
+            if (workoutType === 'weightlifting') {
+                introText = `After ${intensity} weight lifting, focus on ${mealCategory === 'highProtein' ? 'high protein intake' : 'balanced recovery nutrients'} ${mealTime === 'immediate' ? 'immediately' : 'within 1-2 hours'} to support muscle repair and growth.`;
+            } else if (workoutType === 'swimming') {
+                introText = `After ${intensity} swimming, prioritize ${mealCategory === 'energyRestore' ? 'energy restoration' : 'hydration and light recovery'} ${mealTime === 'immediate' ? 'immediately' : 'within 1-2 hours'} to replenish depleted glycogen and support recovery.`;
+            } else if (workoutType === 'biking') {
+                introText = `After ${intensity} biking, focus on ${mealCategory === 'enduranceRecovery' ? 'carbohydrate replenishment with moderate protein' : 'balanced recovery nutrients'} ${mealTime === 'immediate' ? 'immediately' : 'within 1-2 hours'} to restore energy and support muscle recovery.`;
+            } else if (workoutType === 'running') {
+                introText = `After ${intensity} running, prioritize ${mealCategory === 'intensiveRecovery' ? 'glycogen restoration and protein intake' : 'quick-absorbing nutrients'} ${mealTime === 'immediate' ? 'immediately' : 'within 1-2 hours'} to support recovery and reduce muscle soreness.`;
+            }
+            
+            // Create recommendation HTML
+            const introElement = document.createElement('p');
+            introElement.textContent = introText;
+            resultDiv.appendChild(introElement);
+            
+            // Add nutritional focus section
+            const nutritionFocus = document.createElement('div');
+            nutritionFocus.className = 'nutritional-benefits';
+            
+            let focusTitle = '';
+            let focusText = '';
+            
+            if (workoutType === 'weightlifting') {
+                focusTitle = 'Weightlifting Recovery Focus';
+                focusText = 'Prioritize protein for muscle repair, along with complex carbohydrates to restore glycogen and support protein synthesis. Include foods rich in leucine, an essential amino acid that triggers muscle protein synthesis.';
+            } else if (workoutType === 'swimming') {
+                focusTitle = 'Swimming Recovery Focus';
+                focusText = 'Focus on replenishing glycogen stores with complex carbohydrates, moderate protein for muscle repair, and foods rich in electrolytes to restore balance after extended time in water.';
+            } else if (workoutType === 'biking') {
+                focusTitle = 'Biking Recovery Focus';
+                focusText = 'Emphasize higher carbohydrate intake to replace depleted glycogen stores, moderate protein for muscle recovery, and anti-inflammatory foods to reduce oxidative stress from endurance activity.';
+            } else if (workoutType === 'running') {
+                focusTitle = 'Running Recovery Focus';
+                focusText = 'Balance carbohydrates for glycogen replenishment with quality proteins for muscle repair. Include anti-inflammatory foods and those rich in antioxidants to combat oxidative stress from high-impact exercise.';
+            }
+            
+            const focusTitleElement = document.createElement('h4');
+            focusTitleElement.textContent = focusTitle;
+            nutritionFocus.appendChild(focusTitleElement);
+            
+            const focusTextElement = document.createElement('p');
+            focusTextElement.textContent = focusText;
+            nutritionFocus.appendChild(focusTextElement);
+            
+            resultDiv.appendChild(nutritionFocus);
+            
+            // Add the meal suggestions
+            selectedMeals.forEach(meal => {
+                const mealElement = document.createElement('div');
+                mealElement.className = 'meal';
+                
+                const titleElement = document.createElement('h3');
+                titleElement.textContent = meal.title;
+                mealElement.appendChild(titleElement);
+                
+                const ingredientsElement = document.createElement('p');
+                ingredientsElement.innerHTML = `<strong>Ingredients:</strong> ${meal.ingredients.join(', ')}`;
+                mealElement.appendChild(ingredientsElement);
+                
+                const instructionsElement = document.createElement('p');
+                instructionsElement.innerHTML = `<strong>Instructions:</strong> ${meal.instructions}`;
+                mealElement.appendChild(instructionsElement);
+                
+                const benefitsElement = document.createElement('p');
+                benefitsElement.innerHTML = `<strong>Benefits:</strong> ${meal.benefits}`;
+                mealElement.appendChild(benefitsElement);
+                
+                resultDiv.appendChild(mealElement);
+            });
+            
+            // Add a note about timing if immediate post-workout
+            if (mealTime === 'immediate') {
+                const timingNote = document.createElement('p');
+                timingNote.innerHTML = '<strong>Timing Note:</strong> Try to consume this meal within 30-45 minutes post-workout for optimal nutrient absorption and recovery benefits.';
+                resultDiv.appendChild(timingNote);
+            }
+        }
+    </script>
+</body>
+</html>
